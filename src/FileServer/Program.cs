@@ -36,6 +36,7 @@ internal static class Program
     {
         return new LoggerConfiguration()
             .MinimumLevel.Override("System", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
             .WriteTo.Console(new CompactJsonFormatter())
