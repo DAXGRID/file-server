@@ -7,11 +7,11 @@ internal static class FileRoute
         var logger = loggerFactory.CreateLogger(nameof(FileRoute));
 
         app.MapGet(
-            $"/",
-            () =>
+            "/{*rest}",
+            (string route) =>
             {
-                logger.LogInformation("Requested file...");
-                return Results.Ok("Hello, World!");
+                logger.LogInformation("Requested {FileName}...", route);
+                return Results.Ok(route);
             }
         );
     }
