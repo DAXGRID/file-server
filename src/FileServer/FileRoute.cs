@@ -9,27 +9,58 @@ internal static class FileRoute
 
         app.MapGet(
             "{*route}",
-            (string? route) =>
+            (string route = "") =>
             {
                 logger.LogInformation("Requested {FileName}...", route);
 
-                if (route is null)
+                var fileSystemEntryPath = Path.Combine(defaultPath, route);
+                var fileExists = File.Exists(fileSystemEntryPath);
+
+                if (!fileExists)
                 {
-                    return Results.Ok("/");
+                    Results.NotFound();
                 }
 
-                var filePath = Path.Combine(defaultPath, route);
-                var fileExists = File.Exists(filePath);
-
-                if (fileExists)
+                if (IsDirectory(fileSystemEntryPath))
                 {
-                    return Results.Ok(route);
+                    var fileLinks = Directory
+                        .EnumerateFileSystemEntries(fileSystemEntryPath)
+                        .OrderByDescending(x => IsDirectory(x))
+                        .ThenBy(x => x)
+                        .Select(
+                            x =>
+                            IsDirectory(x)
+                            ? FormatDirectoryEntry(Path.GetFileName(x), route)
+                            : FormatFileEntry(Path.GetFileName(x), route)
+                        );
+
+                    var indexFile = File.ReadAllText("Site/index.html")
+                        .Replace("{{ Files }}", string.Join("</br>", fileLinks), StringComparison.InvariantCulture);
+
+                    return Results.Content(
+                        indexFile,
+                        "text/html");
                 }
                 else
                 {
-                    return Results.NotFound();
+                    return Results.File(fileSystemEntryPath);
                 }
             }
         );
+    }
+
+    private static string FormatDirectoryEntry(string name, string route)
+    {
+        return $"<a href=\"{route}/{name}\">{name}/</a>";
+    }
+
+    private static string FormatFileEntry(string name, string route)
+    {
+        return $"<a href=\"{route}/{name}\">{name}</a>";
+    }
+
+    private static bool IsDirectory(string filePath)
+    {
+        return File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
     }
 }
