@@ -1,3 +1,5 @@
+using static FileServer.FileServerDirectory;
+
 namespace FileServer;
 
 internal static class FileRoute
@@ -23,19 +25,11 @@ internal static class FileRoute
 
                 if (IsDirectory(fileSystemEntryPath))
                 {
-                    var fileLinks = Directory
-                        .EnumerateFileSystemEntries(fileSystemEntryPath)
-                        .OrderByDescending(x => IsDirectory(x))
-                        .ThenBy(x => x)
-                        .Select(
-                            x =>
-                            IsDirectory(x)
-                            ? FormatDirectoryEntry(Path.GetFileName(x), route)
-                            : FormatFileEntry(Path.GetFileName(x), route)
-                        );
+                    var fileLinks = HtmlDirectoryBuilder
+                        .CreateDirectoryLinkStructure(fileSystemEntryPath, route);
 
                     var indexFile = File.ReadAllText("Site/index.html")
-                        .Replace("{{ Files }}", string.Join("</br>", fileLinks), StringComparison.InvariantCulture);
+                        .Replace("{{ Files }}", fileLinks, StringComparison.InvariantCulture);
 
                     return Results.Content(
                         indexFile,
@@ -47,20 +41,5 @@ internal static class FileRoute
                 }
             }
         );
-    }
-
-    private static string FormatDirectoryEntry(string name, string route)
-    {
-        return $"<a href=\"{route}/{name}\">{name}/</a>";
-    }
-
-    private static string FormatFileEntry(string name, string route)
-    {
-        return $"<a href=\"{route}/{name}\">{name}</a>";
-    }
-
-    private static bool IsDirectory(string filePath)
-    {
-        return File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
     }
 }
