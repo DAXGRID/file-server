@@ -21,6 +21,8 @@ internal static class Program
             ?? throw new InvalidOperationException(
                 $"{nameof(ILoggerFactory)} is not configured in the IOC container.");
 
+        app.UseMiddleware<BasicAuthMiddleware>();
+
         FileRoute.Setup(app, loggerFactory);
 
         app.Logger.LogInformation("Starting the web service.");
