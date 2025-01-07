@@ -21,7 +21,7 @@ internal static class HtmlDirectoryBuilder
 
         if (!string.IsNullOrWhiteSpace(route))
         {
-            var previousPath = route.LastIndexOf('/') == -1 ? "/" : route.Substring(0, route.LastIndexOf('/'));
+            var previousPath = route.LastIndexOf('/') == -1 ? "/" : $"/{route.Substring(0, route.LastIndexOf('/'))}";
             fileLinks.Insert(0, $"<a href=\"{previousPath}\">../</a>");
         }
 
