@@ -11,6 +11,11 @@ internal static class FileRoute
         var userDirectoryPathsLookup = settings.FileServerUsers.ToDictionary(x => x.Username, x => x.FolderPath)
             ?? throw new InvalidOperationException("Could not convert file server users to a directory path lookup.");
 
+        // Special route to get the favicon.
+        app.MapGet("/favicon.ico", () => {
+            return Results.File(File.ReadAllBytes("Site/favicon.ico"), "image/x-icon");
+        });
+
         app.MapGet(
             "{*route}",
             (HttpContext context, string route = "") =>
