@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 
 namespace FileServer;
@@ -5,12 +6,14 @@ namespace FileServer;
 internal sealed class BasicAuthMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly string _username = "admin";  // Example username
-    private readonly string _password = "password"; // Example password
+    private readonly Dictionary<string, string> _fileServerUsers;
 
-    public BasicAuthMiddleware(RequestDelegate next)
+    public BasicAuthMiddleware(
+        RequestDelegate next,
+        IReadOnlyCollection<FileServerUser> fileServerUsers)
     {
         _next = next;
+        _fileServerUsers = fileServerUsers.ToDictionary(x => x.Username, x => x.Password);
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -25,8 +28,15 @@ internal sealed class BasicAuthMiddleware
             var decodedCredentials = Encoding.UTF8.GetString(Convert.FromBase64String(encodedCredentials));
             var credentials = decodedCredentials.Split(':');
 
-            if (credentials.Length == 2 && credentials[0] == _username && credentials[1] == _password)
+            if (credentials.Length == 2 && _fileServerUsers.TryGetValue(credentials[0], out string? password) && credentials[1] == password)
             {
+                var identity = new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, credentials[0])
+                }, "Custom");
+
+                context.User = new ClaimsPrincipal(identity);
+
                 await _next(context).ConfigureAwait(false);
                 return;
             }

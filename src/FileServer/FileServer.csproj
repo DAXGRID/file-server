@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <None Update="Site\**\*.*" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

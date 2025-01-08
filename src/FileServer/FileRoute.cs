@@ -4,18 +4,29 @@ namespace FileServer;
 
 internal static class FileRoute
 {
-    public static void Setup(WebApplication app, ILoggerFactory loggerFactory)
+    public static void Setup(WebApplication app, ILoggerFactory loggerFactory, Settings settings)
     {
-        const string defaultPath = "";
         var logger = loggerFactory.CreateLogger(nameof(FileRoute));
+
+        var userDirectoryPathsLookup = settings.FileServerUsers.ToDictionary(x => x.Username, x => x.FolderPath)
+            ?? throw new InvalidOperationException("Could not convert file server users to a directory path lookup.");
 
         app.MapGet(
             "{*route}",
-            (string route = "") =>
+            (HttpContext context, string route = "") =>
             {
+                ArgumentNullException.ThrowIfNull(
+                    context.User?.Identity?.Name,
+                    "The user identity was not set, something is wrong with the authentication middleware.");
+
                 logger.LogInformation("Requested {FileName}...", route);
 
-                var fileSystemEntryPath = Path.Combine(defaultPath, route);
+                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                {
+                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                }
+
+                var fileSystemEntryPath = Path.Combine(userPath, route);
                 var fileExists = File.Exists(fileSystemEntryPath);
 
                 if (!fileExists)

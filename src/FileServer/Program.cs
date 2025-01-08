@@ -9,6 +9,8 @@ internal static class Program
 {
     public static async Task Main()
     {
+        var settings = AppSetting.Load<Settings>();
+
         using var cancellationTokenSource = new CancellationTokenSource();
         var cancellationToken = cancellationTokenSource.Token;
 
@@ -21,9 +23,9 @@ internal static class Program
             ?? throw new InvalidOperationException(
                 $"{nameof(ILoggerFactory)} is not configured in the IOC container.");
 
-        app.UseMiddleware<BasicAuthMiddleware>();
+        app.UseMiddleware<BasicAuthMiddleware>(settings.FileServerUsers);
 
-        FileRoute.Setup(app, loggerFactory);
+        FileRoute.Setup(app, loggerFactory, settings);
 
         app.Logger.LogInformation("Starting the web service.");
         var webServerTask = app.RunAsync(cancellationToken).ConfigureAwait(false);
