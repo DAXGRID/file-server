@@ -24,7 +24,7 @@ internal static class FileRoute
                     context.User?.Identity?.Name,
                     "The user identity was not set, something is wrong with the authentication middleware.");
 
-                logger.LogInformation("Requested {FileName}...", route);
+                logger.LogInformation("{User} {Requested}.", context.User.Identity.Name, route);
 
                 if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
                 {
