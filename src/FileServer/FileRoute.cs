@@ -57,5 +57,39 @@ internal static class FileRoute
                 }
             }
         );
+
+        app.MapPost(
+            "{*route}",
+            (HttpContext context,
+             HttpRequest request,
+             string route = "") =>
+            {
+                ArgumentNullException.ThrowIfNull(
+                    context.User?.Identity?.Name,
+                    "The user identity was not set, something is wrong with the authentication middleware.");
+
+                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                {
+                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                }
+
+                if (!request.HasFormContentType || request.Form.Files.Count == 0)
+                    return Results.BadRequest("No file uploaded");
+
+                foreach (var formFile in request.Form.Files)
+                {
+                    var filePath = Path.Combine(userPath, route, formFile.FileName);
+                    logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
+
+                    using var uploadFileStream = formFile.OpenReadStream();
+                    using Stream outStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+
+                    uploadFileStream.Position = 0;
+                    uploadFileStream.CopyTo(outStream);
+                }
+
+                return Results.Redirect($"/{route}");
+            }
+        ).DisableAntiforgery();
     }
 }

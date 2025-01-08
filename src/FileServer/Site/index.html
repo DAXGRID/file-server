@@ -60,6 +60,11 @@
   <body>
     <main>
         <h1>File Server</h1>
+        <form method="post" enctype="multipart/form-data">
+          <label for="files">File</label>
+          <input id="files" name="files" type="file" multiple />
+          <button>Upload</button>
+        </form>
         {{ Files }}
     </main>
   </body>
