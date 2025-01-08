@@ -1,4 +1,5 @@
 using static FileServer.FileServerDirectory;
+using System.Globalization;
 
 namespace FileServer;
 
@@ -14,27 +15,32 @@ internal static class HtmlDirectoryBuilder
             .ThenBy(x => x)
             .Select(
                 x =>
-                IsDirectory(x)
-                ? FormatDirectoryEntry(Path.GetFileName(x), route)
-                : FormatFileEntry(Path.GetFileName(x), route)
+                {
+                    var fileName = Path.GetFileName(x);
+                    var fileInfo = new FileInfo(x);
+
+                    return IsDirectory(x)
+                        ? FormatDirectoryEntry(fileName, $"{route}/{fileName}", fileInfo.LastWriteTime)
+                        : FormatFileEntry(Path.GetFileName(x), route, fileInfo.LastWriteTime, FileSizeFormat.SizeSuffix(fileInfo.Length));
+                }
             ).ToList();
 
         if (!string.IsNullOrWhiteSpace(route))
         {
             var previousPath = route.LastIndexOf('/') == -1 ? "/" : $"/{route.Substring(0, route.LastIndexOf('/'))}";
-            fileLinks.Insert(0, $"<a href=\"{previousPath}\">../</a>");
+            fileLinks.Insert(0, FormatDirectoryEntry("..", previousPath, null));
         }
 
-        return string.Join("</br>", fileLinks);
+        return $"<ul>{string.Join("", fileLinks)}</ul>";
     }
 
-    private static string FormatDirectoryEntry(string name, string route)
+    private static string FormatDirectoryEntry(string name, string route, DateTime? lastModified)
     {
-        return $"<a href=\"{route}/{name}\">{name}/</a>";
+        return $"<li><a style=\"font-weight: bold\" href=\"{route}\"><p>{name}/</p><p></p><p>{lastModified?.ToString("g", new CultureInfo("en-gb")) ?? ""}</p></a></li>";
     }
 
-    private static string FormatFileEntry(string name, string route)
+    private static string FormatFileEntry(string name, string route, DateTime lastModified, string fileSize)
     {
-        return $"<a href=\"{route}/{name}\">{name}</a>";
+        return $"<li><a href=\"{route}/{name}\"><p>{name}</p><p>{fileSize}</p><p>{lastModified.ToString("g", new CultureInfo("en-gb"))}</p></a></li>";
     }
 }
