@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using static FileServer.FileServerDirectory;
 
 namespace FileServer;
@@ -12,13 +13,14 @@ internal static class FileRoute
             ?? throw new InvalidOperationException("Could not convert file server users to a directory path lookup.");
 
         // Special route to get the favicon.
-        app.MapGet("/favicon.ico", () => {
+        app.MapGet("/favicon.ico", () =>
+        {
             return Results.File(File.ReadAllBytes("Site/favicon.ico"), "image/x-icon");
         });
 
         app.MapGet(
             "{*route}",
-            (HttpContext context, string route = "") =>
+            (HttpContext context, [FromRoute] string route = "") =>
             {
                 ArgumentNullException.ThrowIfNull(
                     context.User?.Identity?.Name,
@@ -41,15 +43,40 @@ internal static class FileRoute
 
                 if (IsDirectory(fileSystemEntryPath))
                 {
-                    var fileLinks = HtmlDirectoryBuilder
-                        .CreateDirectoryLinkStructure(fileSystemEntryPath, route);
+                    var isJsonResponse = context.Request.Query.ContainsKey("json");
+                    if (isJsonResponse)
+                    {
+                        var directoryEntries = Directory.GetFileSystemEntries(fileSystemEntryPath)
+                            .Select(x => new FileInfo(x))
+                            .Select(x =>
+                            {
+                                var isDirectory = IsDirectory(x.FullName);
+                                return new FileSystemEntry
+                                {
+                                    Name = x.Name,
+                                    FileSizeBytes = isDirectory ? null : x.Length,
+                                    LastWriteTimeUtc = x.LastWriteTime.ToUniversalTime(),
+                                    IsDirectory = isDirectory,
+                                    FileSize = isDirectory ? null : FileSizeFormat.SizeSuffix(x.Length)
+                                };
+                            })
+                            .OrderByDescending(x => x.IsDirectory)
+                            .ThenBy(x => x.Name);
 
-                    var indexFile = File.ReadAllText("Site/index.html")
-                        .Replace("{{ Files }}", fileLinks, StringComparison.InvariantCulture);
+                        return Results.Ok(directoryEntries);
+                    }
+                    else
+                    {
+                        var fileLinks = HtmlDirectoryBuilder
+                            .CreateDirectoryLinkStructure(fileSystemEntryPath, route);
 
-                    return Results.Content(
-                        indexFile,
-                        "text/html");
+                        var indexFile = File.ReadAllText("Site/index.html")
+                            .Replace("{{ Files }}", fileLinks, StringComparison.InvariantCulture);
+
+                        return Results.Content(
+                            indexFile,
+                            "text/html");
+                    }
                 }
                 else
                 {
