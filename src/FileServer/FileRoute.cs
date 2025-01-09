@@ -115,7 +115,45 @@ internal static class FileRoute
                     uploadFileStream.CopyTo(outStream);
                 }
 
-                return Results.Redirect($"/{route}");
+                var shouldRedirect = context.Request.Query.ContainsKey("redirect");
+                return shouldRedirect ? Results.Redirect($"/{route}") : Results.Ok();
+            }
+        ).DisableAntiforgery();
+
+        app.MapDelete(
+            "{*route}",
+            (HttpContext context, string route = "") =>
+            {
+                 ArgumentNullException.ThrowIfNull(
+                    context.User?.Identity?.Name,
+                    "The user identity was not set, something is wrong with the authentication middleware.");
+
+                logger.LogInformation("{User} {Requested} to be deleted.", context.User.Identity.Name, route);
+
+                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                {
+                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                }
+
+                var fileSystemEntryPath = Path.Combine(userPath, route);
+                var fileExists = File.Exists(fileSystemEntryPath);
+
+                if (!fileExists)
+                {
+                    Results.NotFound();
+                }
+
+                if (IsDirectory(fileSystemEntryPath))
+                {
+                    Directory.Delete(fileSystemEntryPath);
+                }
+                else
+                {
+                    File.Delete(fileSystemEntryPath);
+                }
+
+                var shouldRedirect = context.Request.Query.ContainsKey("redirect");
+                return shouldRedirect ? Results.Redirect($"/{route}") : Results.Ok();
             }
         ).DisableAntiforgery();
     }
