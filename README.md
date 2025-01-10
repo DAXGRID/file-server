@@ -58,7 +58,7 @@ curl -u "user1:password" \
   http://localhost:5000/file.txt
 ```
 
-### Getting the contents of the folder in JSON
+## Getting the contents of the folder in JSON
 
 Example of getting the contents of the default path folder in JSON.
 
