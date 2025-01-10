@@ -49,3 +49,13 @@ curl -u "user1:password" \
   -F "data=@my_text.txt" \
   http://localhost:5000/folder_two
 ```
+
+### Deleting a file
+
+Showcases how to delet a file named `file.txt` in the default path.
+
+```sh
+curl -u "user1:password" \
+  -i -X DELETE \
+  http://localhost:5000/file.txt
+```
