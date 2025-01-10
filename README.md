@@ -38,7 +38,14 @@ Example uploading a file with `curl` in the default path.
 curl -u "user1:password" \
   -i -X POST -H "Content-Type: multipart/form-data" \
   -F "data=@my_text.txt" \
-  http://localhost:5000/folder_two
+  http://localhost:5000
 ```
 
 Example uploading a file with `curl` in another path that is not the default.
+
+```sh
+curl -u "user1:password" \
+  -i -X POST -H "Content-Type: multipart/form-data" \
+  -F "data=@my_text.txt" \
+  http://localhost:5000/folder_two
+```
