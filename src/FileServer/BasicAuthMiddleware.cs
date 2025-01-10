@@ -44,7 +44,7 @@ internal sealed class BasicAuthMiddleware
 
         // If authentication fails, return a 401 Unauthorized response
         context.Response.StatusCode = 401;
-        context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"Example\"";
+        context.Response.Headers["WWW-Authenticate"] = "Basic realm=\"FileServer\"";
         await context.Response.WriteAsync("Unauthorized").ConfigureAwait(false);
     }
 }
