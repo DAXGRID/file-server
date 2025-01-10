@@ -9,7 +9,7 @@ internal static class FileRoute
     {
         var logger = loggerFactory.CreateLogger(nameof(FileRoute));
 
-        var userDirectoryPathsLookup = settings.FileServerUsers.ToDictionary(x => x.Username, x => x.FolderPath)
+        var userLookup = settings.FileServerUsers.ToDictionary(x => x.Username, x => x)
             ?? throw new InvalidOperationException("Could not convert file server users to a directory path lookup.");
 
         // Special route to get the favicon.
@@ -28,12 +28,12 @@ internal static class FileRoute
 
                 logger.LogInformation("{User} {Requested}.", context.User.Identity.Name, route);
 
-                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
                 {
-                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                    throw new InvalidOperationException($"Could not find the user on username: {context.User.Identity.Name}");
                 }
 
-                var fileSystemEntryPath = Path.Combine(userPath, route);
+                var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, route);
                 var fileExists = File.Exists(fileSystemEntryPath);
 
                 if (!fileExists)
@@ -95,9 +95,17 @@ internal static class FileRoute
                     context.User?.Identity?.Name,
                     "The user identity was not set, something is wrong with the authentication middleware.");
 
-                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
                 {
-                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                    throw new InvalidOperationException($"Could not find the user on username: {context.User.Identity.Name}");
+                }
+
+                logger.LogInformation("{User} {Requested} to upload one or more files.", context.User.Identity.Name, route);
+
+                if (!fileServerUser.WriteAccess)
+                {
+                    logger.LogWarning("{User} tried to upload a file, but not have permissions to do it.", context.User.Identity.Name);
+                    return Results.BadRequest("User does not have access to creating or writing to existing files.");
                 }
 
                 if (!request.HasFormContentType || request.Form.Files.Count == 0)
@@ -105,7 +113,7 @@ internal static class FileRoute
 
                 foreach (var formFile in request.Form.Files)
                 {
-                    var filePath = Path.Combine(userPath, route, formFile.FileName);
+                    var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
                     logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
 
                     using var uploadFileStream = formFile.OpenReadStream();
@@ -128,14 +136,21 @@ internal static class FileRoute
                     context.User?.Identity?.Name,
                     "The user identity was not set, something is wrong with the authentication middleware.");
 
-                logger.LogInformation("{User} {Requested} to be deleted.", context.User.Identity.Name, route);
 
-                if (!userDirectoryPathsLookup.TryGetValue(context.User.Identity.Name, out string? userPath))
+                if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
                 {
-                    throw new InvalidOperationException($"Could not get user path for user: {context.User.Identity.Name}");
+                    throw new InvalidOperationException($"Could not find the user on username: {context.User.Identity.Name}");
                 }
 
-                var fileSystemEntryPath = Path.Combine(userPath, route);
+                logger.LogInformation("{User} {Requested} to be deleted.", context.User.Identity.Name, route);
+
+                if (!fileServerUser.DeleteAccess)
+                {
+                    logger.LogWarning("{User} tried to delete a file, but not have permissions to do it.", context.User.Identity.Name);
+                    return Results.BadRequest("User does not have access to delete files.");
+                }
+
+                var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, route);
                 var fileExists = File.Exists(fileSystemEntryPath);
 
                 if (!fileExists)

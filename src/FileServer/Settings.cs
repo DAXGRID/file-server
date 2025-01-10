@@ -12,6 +12,12 @@ internal sealed record FileServerUser
 
     [JsonPropertyName("folderPath")]
     public required string FolderPath { get; init; }
+
+    [JsonPropertyName("writeAccess")]
+    public required bool WriteAccess { get; init; }
+
+    [JsonPropertyName("deleteAccess")]
+    public required bool DeleteAccess { get; init; }
 }
 
 internal sealed record Settings
