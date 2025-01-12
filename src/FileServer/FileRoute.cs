@@ -135,9 +135,9 @@ internal static class FileRoute
             "{*route}",
             (HttpContext context, string route = "") =>
             {
-                 ArgumentNullException.ThrowIfNull(
-                    context.User?.Identity?.Name,
-                    "The user identity was not set, something is wrong with the authentication middleware.");
+                ArgumentNullException.ThrowIfNull(
+                   context.User?.Identity?.Name,
+                   "The user identity was not set, something is wrong with the authentication middleware.");
 
 
                 if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
