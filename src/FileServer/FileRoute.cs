@@ -108,22 +108,33 @@ internal static class FileRoute
                     return Results.BadRequest("User does not have access to creating or writing to existing files.");
                 }
 
-                if (!request.HasFormContentType || request.Form.Files.Count == 0)
+                // Requesting to upload files, but no files were included.
+                if (request.HasFormContentType && request.Form.Files.Count == 0)
                 {
                     logger.LogWarning("{User} uploaded no files, requested failed.", context.User.Identity.Name);
                     return Results.BadRequest("No file uploaded");
                 }
 
-                foreach (var formFile in request.Form.Files)
+                // Upload files.
+                if (request.HasFormContentType && request.Form.Files.Count > 0)
                 {
-                    var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
-                    logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
+                    foreach (var formFile in request.Form.Files)
+                    {
+                        var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
+                        logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
 
-                    using var uploadFileStream = formFile.OpenReadStream();
-                    using Stream outStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                        using var uploadFileStream = formFile.OpenReadStream();
+                        using Stream outStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
 
-                    uploadFileStream.Position = 0;
-                    uploadFileStream.CopyTo(outStream);
+                        uploadFileStream.Position = 0;
+                        uploadFileStream.CopyTo(outStream);
+                    }
+                }
+                // Requesting to create a directory.
+                else
+                {
+                    var directoryPath = Path.Combine(fileServerUser.FolderPath, route);
+                    Directory.CreateDirectory(directoryPath);
                 }
 
                 var shouldRedirect = context.Request.Query.ContainsKey("redirect");

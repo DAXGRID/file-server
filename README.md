@@ -48,6 +48,24 @@ curl -u "user1:password" \
   http://localhost:5000/folder_two
 ```
 
+## Creating a new directory
+
+Example of creating a new folder named `my_newly_created_folder`. If the directory structure already exists it does nothing.
+
+```sh
+curl -u "user1:password" \
+  -i -X POST \
+  http://localhost:5000/my_newly_created_folder
+```
+
+Example creates both the directory named `my_first_new_folder` and then `my_second_new_folder`. If the directory structure already exists it does nothing.
+
+```sh
+curl -u "user1:password" \
+  -i -X POST \
+  http://localhost:5000/my_first_new_folder/my_second_new_folder
+```
+
 ## Deleting a file
 
 Showcases how to delet a file named `file.txt` in the default path.
