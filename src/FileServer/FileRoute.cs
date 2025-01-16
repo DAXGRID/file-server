@@ -174,7 +174,7 @@ internal static class FileRoute
 
                 if (IsDirectory(fileSystemEntryPath))
                 {
-                    Directory.Delete(fileSystemEntryPath);
+                    Directory.Delete(fileSystemEntryPath, true);
                 }
                 else
                 {
