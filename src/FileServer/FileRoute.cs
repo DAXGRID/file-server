@@ -164,6 +164,11 @@ internal static class FileRoute
                     return Results.BadRequest("User does not have access to delete files.");
                 }
 
+                if (string.IsNullOrWhiteSpace(route) || route.Trim() == "/")
+                {
+                    return Results.BadRequest("Cannot delete the root directory.");
+                }
+
                 var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, route);
                 var fileExists = File.Exists(fileSystemEntryPath);
 
