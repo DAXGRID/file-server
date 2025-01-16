@@ -150,7 +150,6 @@ internal static class FileRoute
                    context.User?.Identity?.Name,
                    "The user identity was not set, something is wrong with the authentication middleware.");
 
-
                 if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
                 {
                     throw new InvalidOperationException($"Could not find the user on username: {context.User.Identity.Name}");
