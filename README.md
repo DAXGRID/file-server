@@ -68,12 +68,22 @@ curl -u "user1:password" \
 
 ## Deleting a file
 
-Showcases how to delet a file named `file.txt` in the default path.
+Showcases how to delete a file named `file.txt` in the default path.
 
 ```sh
 curl -u "user1:password" \
   -i -X DELETE \
   http://localhost:5000/file.txt
+```
+
+## Deleting a directory
+
+Example of how to delete a directory. It will recursively delete everything inside that directory.
+
+```sh
+curl -u "user1:password" \
+  -i -X DELETE \
+  http://localhost:5000/my_first_new_folder/my_second_new_folder
 ```
 
 ## Getting the contents of the folder in JSON
