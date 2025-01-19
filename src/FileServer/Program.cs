@@ -17,6 +17,11 @@ internal static class Program
         var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
         builder.Logging.AddSerilog(GetLogger(), true);
+
+
+        builder.WebHost.ConfigureKestrel(
+            options => options.Limits.MaxRequestBodySize = long.MaxValue);
+
         var app = builder.Build();
 
         var loggerFactory = app.Services.GetService<ILoggerFactory>()
