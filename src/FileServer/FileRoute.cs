@@ -34,9 +34,8 @@ internal static class FileRoute
                 }
 
                 var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, route);
-                var fileExists = File.Exists(fileSystemEntryPath);
 
-                if (!fileExists)
+                if (!File.Exists(fileSystemEntryPath) && !Directory.Exists(fileSystemEntryPath))
                 {
                     return Results.NotFound();
                 }
@@ -169,15 +168,13 @@ internal static class FileRoute
                 }
 
                 var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, route);
-                var fileExists = File.Exists(fileSystemEntryPath);
 
-                if (!fileExists)
+                if (!File.Exists(fileSystemEntryPath) && !Directory.Exists(fileSystemEntryPath))
                 {
                     return Results.NotFound();
                 }
 
                 var isDirectory = IsDirectory(fileSystemEntryPath);
-
                 if (isDirectory)
                 {
                     Directory.Delete(fileSystemEntryPath, true);
@@ -198,6 +195,48 @@ internal static class FileRoute
                 {
                     return Results.Ok();
                 }
+            }
+        ).DisableAntiforgery();
+
+        app.MapPut(
+            "/move",
+            (HttpContext context, [FromQuery] string sourceFilePath, [FromQuery] string destFilePath) =>
+            {
+                ArgumentNullException.ThrowIfNull(
+                    context.User?.Identity?.Name,
+                    "The user identity was not set, something is wrong with the authentication middleware.");
+
+                if (!userLookup.TryGetValue(context.User.Identity.Name, out FileServerUser? fileServerUser))
+                {
+                    throw new InvalidOperationException($"Could not find the user on username: {context.User.Identity.Name}");
+                }
+
+                logger.LogInformation("{User} the file in path {FileRoute} to be moved to {MovedToRoute}.", context.User.Identity.Name, sourceFilePath, destFilePath);
+
+                if (!fileServerUser.DeleteAccess || !fileServerUser.WriteAccess)
+                {
+                    logger.LogWarning("{User} tried to move a file, but not have permissions to do it.", context.User.Identity.Name);
+                    return Results.BadRequest("User does not have access to move files.");
+                }
+
+                var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, sourceFilePath);
+
+                if (!File.Exists(fileSystemEntryPath))
+                {
+                    logger.LogWarning("{User} tried to move {File}, but it does not exist.", context.User.Identity.Name, fileSystemEntryPath);
+                    return Results.BadRequest("File does not exist. Make sure you're sending a valid file path.");
+                }
+
+                var newFileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, destFilePath);
+                if (File.Exists(newFileSystemEntryPath))
+                {
+                    logger.LogWarning("{User} tried to move {File}, there is already a file with that name.", context.User.Identity.Name, newFileSystemEntryPath);
+                    return Results.BadRequest("A file with the same name already exists in the new file path.");
+                }
+
+                File.Move(fileSystemEntryPath, newFileSystemEntryPath, false);
+
+                return Results.Ok();
             }
         ).DisableAntiforgery();
     }

@@ -86,6 +86,16 @@ curl -u "user1:password" \
   http://localhost:5000/my_first_new_folder/my_second_new_folder
 ```
 
+## Moving a file
+
+Example of how to move a file from `folder_one` to `folder_two`.
+
+```sh
+curl -u "user1:password" \
+  -i -X PUT \
+  "http://localhost:5000/move?sourceFilePath=folder_one/my_file.txt&destFilePath=folder_two/my_file.txt"
+```
+
 ## Getting the contents of the folder in JSON
 
 Example of getting the contents of the default path folder in JSON.
