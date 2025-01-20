@@ -176,7 +176,9 @@ internal static class FileRoute
                     Results.NotFound();
                 }
 
-                if (IsDirectory(fileSystemEntryPath))
+                var isDirectory = IsDirectory(fileSystemEntryPath);
+
+                if (isDirectory)
                 {
                     Directory.Delete(fileSystemEntryPath, true);
                 }
@@ -186,7 +188,16 @@ internal static class FileRoute
                 }
 
                 var shouldRedirect = context.Request.Query.ContainsKey("redirect");
-                return shouldRedirect ? Results.Redirect($"/{route.Replace($"/{Path.GetFileName(fileSystemEntryPath)}", "", StringComparison.InvariantCulture)}") : Results.Ok();
+                if (shouldRedirect)
+                {
+                    return isDirectory
+                        ? Results.Redirect($"/{route.Replace($"{new DirectoryInfo(fileSystemEntryPath).Name}", "", StringComparison.InvariantCulture)}")
+                        : Results.Redirect($"/{route.Replace($"{Path.GetFileName(fileSystemEntryPath)}", "", StringComparison.InvariantCulture)}");
+                }
+                else
+                {
+                    return Results.Ok();
+                }
             }
         ).DisableAntiforgery();
     }
