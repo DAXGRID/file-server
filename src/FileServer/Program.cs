@@ -18,11 +18,14 @@ internal static class Program
         builder.Logging.ClearProviders();
         builder.Logging.AddSerilog(GetLogger(), true);
 
-
         builder.WebHost.ConfigureKestrel(
             options => options.Limits.MaxRequestBodySize = long.MaxValue);
 
         var app = builder.Build();
+
+        // This is enabled so we can handle form posts for delete.
+        app.UseHttpMethodOverride(new HttpMethodOverrideOptions { FormFieldName = "_method"});
+        app.UseRouting();
 
         var loggerFactory = app.Services.GetService<ILoggerFactory>()
             ?? throw new InvalidOperationException(

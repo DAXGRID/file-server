@@ -186,7 +186,7 @@ internal static class FileRoute
                 }
 
                 var shouldRedirect = context.Request.Query.ContainsKey("redirect");
-                return shouldRedirect ? Results.Redirect($"/{route}") : Results.Ok();
+                return shouldRedirect ? Results.Redirect($"/{route.Replace($"/{Path.GetFileName(fileSystemEntryPath)}", "", StringComparison.InvariantCulture)}") : Results.Ok();
             }
         ).DisableAntiforgery();
     }
