@@ -10,6 +10,9 @@ internal sealed record FileSystemEntry
     [JsonPropertyName("lastWriteTimeUtc")]
     public required DateTime LastWriteTimeUtc { get; init; }
 
+    [JsonPropertyName("lastWriteTimeUtcUnixtimeStamp")]
+    public long LastWriteTimeUtcUnixtimeStamp => ((DateTimeOffset)LastWriteTimeUtc).ToUnixTimeSeconds();
+
     [JsonPropertyName("fileSizeBytes")]
     public required long? FileSizeBytes { get; init; }
 

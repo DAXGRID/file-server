@@ -99,31 +99,19 @@ Example of output.
 ```json
 [
   {
-    "name": "folder_one",
-    "lastWriteTimeUtc": "2025-01-08T15:09:44.8965425Z",
+    "name": "test",
+    "lastWriteTimeUtc": "2025-01-20T11:42:05.1634841Z",
+    "lastWriteTimeUtcUnixtimeStamp": 1737373325,
     "fileSizeBytes": null,
     "fileSize": null,
     "isDirectory": true
   },
   {
-    "name": "folder_three",
-    "lastWriteTimeUtc": "2025-01-07T09:25:14.7323732Z",
-    "fileSizeBytes": null,
-    "fileSize": null,
-    "isDirectory": true
-  },
-  {
-    "name": "folder_two",
-    "lastWriteTimeUtc": "2025-01-10T10:29:41.9617931Z",
-    "fileSizeBytes": null,
-    "fileSize": null,
-    "isDirectory": true
-  },
-  {
-    "name": "my_text.txt",
-    "lastWriteTimeUtc": "2025-01-10T10:27:30.4823977Z",
-    "fileSizeBytes": 12894,
-    "fileSize": "12.6 KB",
+    "name": "readme.md",
+    "lastWriteTimeUtc": "2025-01-20T11:42:58.8525281Z",
+    "lastWriteTimeUtcUnixtimeStamp": 1737373378,
+    "fileSizeBytes": 26,
+    "fileSize": "26.0 bytes",
     "isDirectory": false
   }
 ]
@@ -141,38 +129,19 @@ Example of output.
 ```json
 [
   {
-    "name": "documents",
-    "lastWriteTimeUtc": "2025-01-08T16:12:19.3597558Z",
+    "name": "test",
+    "lastWriteTimeUtc": "2025-01-20T11:42:05.1634841Z",
+    "lastWriteTimeUtcUnixtimeStamp": 1737373325,
     "fileSizeBytes": null,
     "fileSize": null,
     "isDirectory": true
   },
   {
-    "name": "images",
-    "lastWriteTimeUtc": "2025-01-08T16:12:55.2529702Z",
-    "fileSizeBytes": null,
-    "fileSize": null,
-    "isDirectory": true
-  },
-  {
-    "name": "20241104_134204.jpg",
-    "lastWriteTimeUtc": "2025-01-08T13:26:21.6989601Z",
-    "fileSizeBytes": 7993054,
-    "fileSize": "7.6 MB",
-    "isDirectory": false
-  },
-  {
-    "name": "my_file_x.xml",
-    "lastWriteTimeUtc": "2025-01-08T13:04:10.6502739Z",
-    "fileSizeBytes": 557,
-    "fileSize": "557.0 bytes",
-    "isDirectory": false
-  },
-  {
-    "name": "my_text.txt",
-    "lastWriteTimeUtc": "2025-01-08T15:09:44.8965425Z",
-    "fileSizeBytes": 12894,
-    "fileSize": "12.6 KB",
+    "name": "readme.md",
+    "lastWriteTimeUtc": "2025-01-20T11:42:58.8525281Z",
+    "lastWriteTimeUtcUnixtimeStamp": 1737373378,
+    "fileSizeBytes": 26,
+    "fileSize": "26.0 bytes",
     "isDirectory": false
   }
 ]
