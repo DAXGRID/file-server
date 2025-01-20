@@ -117,7 +117,6 @@ Example of output.
 ]
 ```
 
-
 Example of getting the contents of a specific folder in JSON.
 
 ```sh
