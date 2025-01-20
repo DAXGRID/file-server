@@ -38,7 +38,7 @@ internal static class FileRoute
 
                 if (!fileExists)
                 {
-                    Results.NotFound();
+                    return Results.NotFound();
                 }
 
                 if (IsDirectory(fileSystemEntryPath))
@@ -173,7 +173,7 @@ internal static class FileRoute
 
                 if (!fileExists)
                 {
-                    Results.NotFound();
+                    return Results.NotFound();
                 }
 
                 var isDirectory = IsDirectory(fileSystemEntryPath);
