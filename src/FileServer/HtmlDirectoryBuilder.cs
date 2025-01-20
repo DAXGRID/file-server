@@ -44,9 +44,8 @@ internal static class HtmlDirectoryBuilder
 
     private static string FormatFileEntry(string name, string route, DateTime lastModified, string fileSize)
     {
-        var deleteFileActionPath = Path.Combine(route, name);
-        var linkPath = Path.Combine(route, name);
-        return $"<li><a href=\"/{linkPath}\"><p>{name}</p><p>{fileSize}</p><p>{lastModified.ToString("g", new CultureInfo("en-gb"))}</p></a>{DeleteForm(deleteFileActionPath)}</li>";
+        var resourceLink = Path.Combine(route, name);
+        return $"<li><a href=\"/{resourceLink}\"><p>{name}</p><p>{fileSize}</p><p>{lastModified.ToString("g", new CultureInfo("en-gb"))}</p></a>{DeleteForm(resourceLink)}</li>";
     }
 
     private static string DeleteForm(string actionLink)
