@@ -128,11 +128,11 @@ internal static class FileRoute
 
                         using (var uploadFileStream = formFile.OpenReadStream())
                         {
-                            using (Stream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write))
+                            using (FileStream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write))
                             {
                                 uploadFileStream.Position = 0;
                                 uploadFileStream.CopyTo(outStream);
-                                outStream.Flush();
+                                outStream.Flush(true);
                             }
                         }
 
