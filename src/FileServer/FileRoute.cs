@@ -126,11 +126,14 @@ internal static class FileRoute
                         var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
                         logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
 
-                        using var uploadFileStream = formFile.OpenReadStream();
-                        using Stream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write);
-
-                        uploadFileStream.Position = 0;
-                        uploadFileStream.CopyTo(outStream);
+                        using (var uploadFileStream = formFile.OpenReadStream())
+                        {
+                            using (Stream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write))
+                            {
+                                uploadFileStream.Position = 0;
+                                uploadFileStream.CopyTo(outStream);
+                            }
+                        }
 
                         // Move the file to the destination folder.
                         File.Move(tempFileName, filePath);
