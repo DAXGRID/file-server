@@ -119,14 +119,21 @@ internal static class FileRoute
                 {
                     foreach (var formFile in request.Form.Files)
                     {
+                        // This is done to avoid issues where only half of the file has been uploaded and another user downloads it.
+                        // We write it to temp storage and move it to the correct path after.
+                        var tempFileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
                         var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
                         logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
 
                         using var uploadFileStream = formFile.OpenReadStream();
-                        using Stream outStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+                        using Stream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write);
 
                         uploadFileStream.Position = 0;
                         uploadFileStream.CopyTo(outStream);
+
+                        // Move the file to the destination folder.
+                        File.Move(tempFileName, filePath);
                     }
                 }
                 // Requesting to create a directory.
