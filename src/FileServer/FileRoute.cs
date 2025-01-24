@@ -139,8 +139,7 @@ internal static class FileRoute
                 var shouldRedirect = context.Request.Query.ContainsKey("redirect");
                 return shouldRedirect ? Results.Redirect($"/{route}") : Results.Ok();
             }
-        ).DisableAntiforgery()
-         .WithFormOptions(multipartBodyLengthLimit: long.MaxValue);
+        ).DisableAntiforgery();
 
         app.MapDelete(
             "{*route}",

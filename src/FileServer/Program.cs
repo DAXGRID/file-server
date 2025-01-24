@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.AspNetCore.Http.Features;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -9,6 +10,8 @@ internal static class Program
 {
     public static async Task Main()
     {
+        const long bodyRequestLimit = 10_737_418_240; // 10 GB
+
         var settings = AppSetting.Load<Settings>();
 
         using var cancellationTokenSource = new CancellationTokenSource();
@@ -19,7 +22,10 @@ internal static class Program
         builder.Logging.AddSerilog(GetLogger(), true);
 
         builder.WebHost.ConfigureKestrel(
-            options => options.Limits.MaxRequestBodySize = long.MaxValue);
+            options => options.Limits.MaxRequestBodySize = bodyRequestLimit);
+
+        builder.Services.Configure<FormOptions>(
+            options => options.MultipartBodyLengthLimit =  bodyRequestLimit);
 
         var app = builder.Build();
 
