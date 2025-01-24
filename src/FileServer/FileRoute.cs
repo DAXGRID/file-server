@@ -132,6 +132,7 @@ internal static class FileRoute
                             {
                                 uploadFileStream.Position = 0;
                                 uploadFileStream.CopyTo(outStream);
+                                outStream.Flush();
                             }
                         }
 
