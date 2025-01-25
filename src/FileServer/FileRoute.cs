@@ -86,7 +86,7 @@ internal static class FileRoute
 
         app.MapPost(
             "{*route}",
-            async (HttpContext context,
+            (HttpContext context,
              HttpRequest request,
              string route = "") =>
             {
@@ -131,8 +131,8 @@ internal static class FileRoute
                             using (FileStream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                             {
                                 uploadFileStream.Position = 0;
-                                await uploadFileStream.CopyToAsync(outStream).ConfigureAwait(false);
-                                await outStream.FlushAsync().ConfigureAwait(false); // Flush to OS
+                                uploadFileStream.CopyTo(outStream);
+                                outStream.Flush(true); // Flush to disk.
                             }
                         }
 
