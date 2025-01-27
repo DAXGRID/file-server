@@ -110,7 +110,7 @@ internal static class FileRoute
                 }
 
                 // Requesting to upload files, but no files were included.
-                if (request.HasFormContentType && request.Form.Files.Any())
+                if (request.HasFormContentType && request.Form.Files.Count == 0)
                 {
                     logger.LogWarning("{User} uploaded no files, requested failed.", context.User.Identity.Name);
                     return Results.BadRequest("No file uploaded");
