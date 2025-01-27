@@ -110,13 +110,14 @@ internal static class FileRoute
                 }
 
                 // Requesting to upload files, but no files were included.
-                if (request.HasFormContentType && request.Form.Files.Count == 0)
+                if (request.HasFormContentType && request.Form.Files.Any())
                 {
                     logger.LogWarning("{User} uploaded no files, requested failed.", context.User.Identity.Name);
                     return Results.BadRequest("No file uploaded");
                 }
 
-                if (request.Form.Files.Any(x => x.FileName.StartsWith('.')))
+
+                if (request.HasFormContentType && request.Form.Files.Any() && request.Form.Files.Any(x => x.FileName.StartsWith('.')))
                 {
                     return Results.BadRequest("File names cannot start with '.'.");
                 }
