@@ -47,6 +47,8 @@ internal static class FileRoute
                     {
                         var directoryEntries = Directory.GetFileSystemEntries(fileSystemEntryPath)
                             .Select(x => new FileInfo(x))
+                            // We do not want hidden files or directories to be shown.
+                            .Where(x => !x.Name.StartsWith('.'))
                             .Select(x =>
                             {
                                 var isDirectory = IsDirectory(x.FullName);
@@ -114,6 +116,11 @@ internal static class FileRoute
                     return Results.BadRequest("No file uploaded");
                 }
 
+                if (request.Form.Files.Any(x => x.FileName.StartsWith('.')))
+                {
+                    return Results.BadRequest("File names cannot start with '.'.");
+                }
+
                 // Upload files.
                 if (request.HasFormContentType && request.Form.Files.Count > 0)
                 {
@@ -121,7 +128,7 @@ internal static class FileRoute
                     {
                         // This is done to avoid issues where only half of the file has been uploaded and another user downloads it.
                         // We write it to temp storage and move it to the correct path after.
-                        var tempFileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                        var tempFileName = Path.Combine(fileServerUser.FolderPath, $".{Path.GetRandomFileName()}");
 
                         var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
                         logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);

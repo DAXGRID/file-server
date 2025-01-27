@@ -13,15 +13,15 @@ internal static class HtmlDirectoryBuilder
             .EnumerateFileSystemEntries(fileSystemEntryPath)
             .OrderByDescending(x => IsDirectory(x))
             .ThenBy(x => x)
+            .Select(x => new FileInfo(x))
+            // We do not want hidden files or directories to be shown.
+            .Where(x => !x.Name.StartsWith('.'))
             .Select(
                 x =>
                 {
-                    var fileName = Path.GetFileName(x);
-                    var fileInfo = new FileInfo(x);
-
-                    return IsDirectory(x)
-                        ? FormatDirectoryEntry(fileName, Path.Combine(route, fileName), fileInfo.LastWriteTime, true)
-                        : FormatFileEntry(Path.GetFileName(x), route, fileInfo.LastWriteTime, FileSizeFormat.SizeSuffix(fileInfo.Length));
+                    return IsDirectory(x.FullName)
+                        ? FormatDirectoryEntry(x.Name, Path.Combine(route, x.Name), x.LastWriteTime, true)
+                        : FormatFileEntry(x.Name, route, x.LastWriteTime, FileSizeFormat.SizeSuffix(x.Length));
                 }
             ).ToList();
 
