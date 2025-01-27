@@ -31,7 +31,10 @@ WORKDIR /app
 
 COPY --from=build-env /app/src/${PROJECT_NAME}/out .
 
-CMD dotnet $(echo ${EXECUTEABLE})
+# Cannot use PROJECT_NAME here in environment, have to sadly write out the whole name.
+# There is a hack where you can execute this as an environment variable, but then the process won't have id 1
+# and signal are no longer received.
+ENTRYPOINT ["dotnet", "FileServer.dll"]
 
 ENV ASPNETCORE_URLS=http://+80
 EXPOSE 80
