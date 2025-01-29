@@ -238,7 +238,7 @@ internal static class FileRoute
                     return Results.BadRequest("User does not have access to move files.");
                 }
 
-                var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, sourceFilePath);
+                var fileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, sourceFilePath.TrimStart('/'));
 
                 if (!File.Exists(fileSystemEntryPath))
                 {
@@ -246,7 +246,7 @@ internal static class FileRoute
                     return Results.BadRequest("File does not exist. Make sure you're sending a valid file path.");
                 }
 
-                var newFileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, destFilePath);
+                var newFileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, destFilePath.TrimStart('/'));
                 if (File.Exists(newFileSystemEntryPath))
                 {
                     logger.LogWarning("{User} tried to move {File}, there is already a file with that name.", context.User.Identity.Name, newFileSystemEntryPath);
