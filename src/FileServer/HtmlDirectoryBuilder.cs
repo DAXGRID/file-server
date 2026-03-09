@@ -16,6 +16,8 @@ internal static class HtmlDirectoryBuilder
             .Select(x => new FileInfo(x))
             // We do not want hidden files or directories to be shown.
             .Where(x => !x.Name.StartsWith('.'))
+            .OrderBy(x => IsDirectory(x.FullName))
+            .ThenByDescending(x => x.CreationTimeUtc)
             .Select(
                 x =>
                 {
