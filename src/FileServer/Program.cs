@@ -27,7 +27,7 @@ internal static class Program
         builder.Services.Configure<FormOptions>(
             options => options.MultipartBodyLengthLimit =  bodyRequestLimit);
 
-        var app = builder.Build();
+        using var app = builder.Build();
 
         // This is enabled so we can handle form posts for delete.
         app.UseHttpMethodOverride(new HttpMethodOverrideOptions { FormFieldName = "_method"});
@@ -42,10 +42,8 @@ internal static class Program
         FileRoute.Setup(app, loggerFactory, settings);
 
         app.Logger.LogInformation("Starting the web service.");
-        var webServerTask = app.RunAsync(cancellationToken).ConfigureAwait(false);
-        app.Logger.LogInformation("The web service is now started.");
 
-        await webServerTask;
+        await app.RunAsync(cancellationToken).ConfigureAwait(false);
 
         app.Logger.LogInformation("Shutting down...");
     }
