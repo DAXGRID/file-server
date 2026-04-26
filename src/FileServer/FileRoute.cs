@@ -116,7 +116,6 @@ internal static class FileRoute
                     return Results.BadRequest("No file uploaded");
                 }
 
-
                 if (request.HasFormContentType && request.Form.Files.Any() && request.Form.Files.Any(x => x.FileName.StartsWith('.')))
                 {
                     return Results.BadRequest("File names cannot start with '.'.");
