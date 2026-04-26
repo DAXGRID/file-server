@@ -144,7 +144,8 @@ internal static class FileRoute
                         }
 
                         // Move the file to the destination folder.
-                        File.Move(tempFileName, filePath);
+                        // The user can overwrite the file if it has delete access.
+                        File.Move(tempFileName, filePath, fileServerUser.DeleteAccess);
                     }
                 }
                 // Requesting to create a directory.
