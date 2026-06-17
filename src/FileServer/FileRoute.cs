@@ -88,7 +88,7 @@ internal static class FileRoute
 
         app.MapPost(
             "{*route}",
-            (HttpContext context,
+            async (HttpContext context,
              HttpRequest request,
              string route = "") =>
             {
@@ -133,19 +133,33 @@ internal static class FileRoute
                         var filePath = Path.Combine(fileServerUser.FolderPath, route, formFile.FileName);
                         logger.LogInformation("{User} {Uploaded} in {Route}. Will be written to {FilePath}.", context.User.Identity.Name, formFile.FileName, route, filePath);
 
-                        using (var uploadFileStream = formFile.OpenReadStream())
+                        try
                         {
-                            using (FileStream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                            using var uploadFileStream = formFile.OpenReadStream();
+                            using FileStream outStream = new FileStream(tempFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                            await uploadFileStream.CopyToAsync(
+                                outStream,
+                                context.RequestAborted)
+                                .ConfigureAwait(false);
+
+                            #pragma warning disable CA1849
+                            // We want to make sure that is has been written to disk.
+                            // It's very important that we do not loss data and that the file is 100% intact
+                            // for when other processes are downloading it.
+                            outStream.Flush(true);
+                            #pragma warning restore CA1849
+
+                            // Move the file to the destination folder.
+                            // The user can overwrite the file if it has delete access.
+                            File.Move(tempFileName, filePath, fileServerUser.DeleteAccess);
+                        }
+                        finally
+                        {
+                            if (File.Exists(tempFileName))
                             {
-                                uploadFileStream.Position = 0;
-                                uploadFileStream.CopyTo(outStream);
-                                outStream.Flush(true); // Flush to disk.
+                                File.Delete(tempFileName);
                             }
                         }
-
-                        // Move the file to the destination folder.
-                        // The user can overwrite the file if it has delete access.
-                        File.Move(tempFileName, filePath, fileServerUser.DeleteAccess);
                     }
                 }
                 // Requesting to create a directory.
