@@ -166,6 +166,10 @@ internal static class FileRoute
                 else
                 {
                     var directoryPath = Path.Combine(fileServerUser.FolderPath, route);
+                    if (Directory.Exists(directoryPath))
+                    {
+                        return Results.BadRequest($"A directory in path: {route} already exists.");
+                    }
                     Directory.CreateDirectory(directoryPath);
                 }
 
