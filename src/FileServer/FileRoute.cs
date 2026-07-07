@@ -265,7 +265,7 @@ internal static class FileRoute
                 }
 
                 var newFileSystemEntryPath = Path.Combine(fileServerUser.FolderPath, destFilePath.TrimStart('/'));
-                if (File.Exists(newFileSystemEntryPath))
+                if (File.Exists(newFileSystemEntryPath) && !fileServerUser.DeleteAccess)
                 {
                     logger.LogWarning("{User} tried to move {File}, there is already a file with that name.", context.User.Identity.Name, newFileSystemEntryPath);
                     return Results.BadRequest("A file with the same name already exists in the new file path.");
