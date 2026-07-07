@@ -271,7 +271,7 @@ internal static class FileRoute
                     return Results.BadRequest("A file with the same name already exists in the new file path.");
                 }
 
-                File.Move(fileSystemEntryPath, newFileSystemEntryPath, false);
+                File.Move(fileSystemEntryPath, newFileSystemEntryPath, fileServerUser.DeleteAccess);
 
                 return Results.Ok();
             }
