@@ -19,7 +19,7 @@ WORKDIR /app/src/${PROJECT_NAME}
 RUN dotnet publish -c Release -o out --packages ./packages
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:${DOTNET_VERSION}-alpine-extra
 
 # Renew the ARG argument for it to be available in this build context.
 ARG PROJECT_NAME
